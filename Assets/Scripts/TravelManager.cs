@@ -8,6 +8,7 @@ public class TravelManager : MonoBehaviour
 {
     public GameData gameData;
     public GameObject travelPanel;
+    public GameObject nightPanel;
     public TextMeshProUGUI dialogueText;
     public Button nextButton;
     public DayCrisisManager dayCrisisManager;
@@ -65,12 +66,10 @@ public class TravelManager : MonoBehaviour
         currentLineIndex = 0;
         int areaIndex = Mathf.Clamp(gameData.currentArea - 1, 0, areaDialogues.Length - 1);
         currentDialogues = areaDialogues[areaIndex];
-        travelPanel.SetActive(true);
-        ShowLine();
 
-        currentLineIndex = 0;
+        if (nightPanel != null)
+            nightPanel.SetActive(false);
 
-        currentDialogues = areaDialogues[areaIndex];
         // 切换背景
         if (areaBackgrounds.Length > areaIndex)
         {

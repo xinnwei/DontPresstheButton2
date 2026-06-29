@@ -14,7 +14,7 @@ public class ButtonInteraction : MonoBehaviour
 
     void OnMusicBoxTurned()
     {
-        gameData.TurnMusicBox();
+        gameData.TurnMusicBox(10);
         Debug.Log($"八音盒逆转次数：{gameData.musicBoxTurnCount} | 自我完整度：{gameData.selfIntegrity}");
     }
 }

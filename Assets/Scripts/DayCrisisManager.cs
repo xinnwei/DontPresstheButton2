@@ -8,6 +8,7 @@ public class DayCrisisManager : MonoBehaviour
 {
     public GameData gameData;
     public GameObject dayCrisisPanel;
+    public NightPanelManager nightPanelManager;
 
     [Header("按钮")]
     public Button struggle1Button;
@@ -75,7 +76,7 @@ public class DayCrisisManager : MonoBehaviour
 
     void OnMusicBox()
     {
-        gameData.TurnMusicBox();
+        gameData.TurnMusicBox(10);
         gameData.todayLog = "逆转了八音盒，危机消散了，但有什么东西再也回不来了。";
         Debug.Log($"逆转八音盒：自我完整度：{gameData.selfIntegrity}");
         CloseCrisis();
@@ -84,5 +85,7 @@ public class DayCrisisManager : MonoBehaviour
     void CloseCrisis()
     {
         dayCrisisPanel.SetActive(false);
+        if (nightPanelManager != null)
+            nightPanelManager.OnReturnFromCrisis();
     }
 }

@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: GameData
   m_EditorClassIdentifier: 
   maxCarHP: 100
-  currentCarHP: 85
-  parts: 8
-  will: 5
+  currentCarHP: 100
+  parts: 10
+  will: 10
   maxWill: 10
-  selfIntegrity: 80
+  selfIntegrity: 100
   maxSelfIntegrity: 100
-  currentDay: 3
-  currentArea: 2
-  todayLog: 
-  musicBoxTurnCount: 1
+  currentDay: 1
+  currentArea: 1
+  todayLog:
+  musicBoxTurnCount: 0

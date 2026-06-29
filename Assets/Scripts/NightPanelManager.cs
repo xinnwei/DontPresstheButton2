@@ -27,25 +27,50 @@ public class NightPanelManager : MonoBehaviour
     public TextMeshProUGUI repairInfoText;
     public TextMeshProUGUI diaryText;
 
-    int daysPerArea = 3;
+    int daysPerArea = 2;
 
     void Start()
     {
         gameData.ResetData();
-        nightPanel.SetActive(false);
         repairPanel.SetActive(false);
         diaryPanel.SetActive(false);
 
         endDayButton.onClick.AddListener(OpenRepairPanel);
-        triggerCrisisButton.onClick.AddListener(travelManager.StartTravel);
+        triggerCrisisButton.onClick.AddListener(OnGoForward);
         repairButton.onClick.AddListener(OnRepair);
         skipRepairButton.onClick.AddListener(OnSkipRepair);
         endDiaryButton.onClick.AddListener(OnEndDiary);
+
+        ShowGoForward();
+    }
+
+    void OnGoForward()
+    {
+        triggerCrisisButton.gameObject.SetActive(false);
+        travelManager.StartTravel();
+    }
+
+    public void OnReturnFromCrisis()
+    {
+        nightPanel.SetActive(true);
+        ShowEndDay();
+    }
+
+    void ShowGoForward()
+    {
+        triggerCrisisButton.gameObject.SetActive(true);
+        endDayButton.gameObject.SetActive(false);
+    }
+
+    void ShowEndDay()
+    {
+        triggerCrisisButton.gameObject.SetActive(false);
+        endDayButton.gameObject.SetActive(true);
     }
 
     void OpenRepairPanel()
     {
-        repairInfoText.text = $"零件：{gameData.parts}  汽车完整度：{gameData.currentCarHP}/{gameData.maxCarHP}\n修车消耗3个零件，回复15点完整度。";
+        repairInfoText.text = $"零件：{gameData.parts}  汽车完整度：{gameData.currentCarHP}/{gameData.maxCarHP}\n每消耗1个零件，回复8点完整度。";
         nightPanel.SetActive(true);
         repairPanel.SetActive(true);
         diaryPanel.SetActive(false);
@@ -54,7 +79,7 @@ public class NightPanelManager : MonoBehaviour
     void OnRepair()
     {
         gameData.RepairCar(3);
-        Debug.Log("修车：零件-3，汽车+15");
+        Debug.Log("修车：零件-3，汽车+24");
         OpenDiaryPanel();
     }
 
@@ -76,12 +101,13 @@ public class NightPanelManager : MonoBehaviour
     {
         gameData.NightRecover();
         gameData.todayLog = "";
-        nightPanel.SetActive(false);
         diaryPanel.SetActive(false);
 
         if (gameData.currentDay % daysPerArea == 0)
         {
             areaManager.TryAdvanceArea();
         }
+
+        ShowGoForward();
     }
 }

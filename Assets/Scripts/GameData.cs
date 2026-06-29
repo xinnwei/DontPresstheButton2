@@ -10,7 +10,7 @@ public class GameData : ScriptableObject
     public int currentCarHP = 100;
 
     [Header("资源")]
-    public int parts = 15;      // 零件
+    public int parts = 10;      // 零件
     public int will = 10;       // 意志
     public int maxWill = 10;
 
@@ -24,11 +24,10 @@ public class GameData : ScriptableObject
     public string todayLog = "";
     public int musicBoxTurnCount = 0; // 八音盒逆转次数
 
-    // 八音盒逆转
-    public void TurnMusicBox()
+    public void TurnMusicBox(int selfCost)
     {
         musicBoxTurnCount++;
-        selfIntegrity -= 20; // 具体数值待定
+        selfIntegrity -= selfCost;
         selfIntegrity = Mathf.Clamp(selfIntegrity, 0, maxSelfIntegrity);
     }
 
@@ -46,7 +45,7 @@ public class GameData : ScriptableObject
         if (parts >= partsUsed)
         {
             parts -= partsUsed;
-            currentCarHP += partsUsed * 5; // 比例待定
+            currentCarHP += partsUsed * 8; // 1零件=8HP
             currentCarHP = Mathf.Clamp(currentCarHP, 0, maxCarHP);
         }
     }
@@ -59,7 +58,7 @@ public class GameData : ScriptableObject
     public void ResetData()
     {
         currentCarHP = maxCarHP;
-        parts = 15;
+        parts = 10;
         will = 10;
         selfIntegrity = maxSelfIntegrity;
         currentDay = 1;
