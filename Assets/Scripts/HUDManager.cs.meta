@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 24598f15c0280414bb8552fb93bfa80e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - gameData: {instanceID: 0}
+  - hpText: {instanceID: 0}
+  - sanText: {instanceID: 0}
+  - moneyText: {instanceID: 0}
+  - luckText: {instanceID: 0}
+  - buttonCountText: {instanceID: 0}
+  - dayText: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
