@@ -52,7 +52,7 @@ public class GameData : ScriptableObject
 
     public bool IsGameOver()
     {
-        return currentCarHP <= 0;
+        return currentCarHP <= 0 || selfIntegrity <= 0;
     }
 
     public void ResetData()

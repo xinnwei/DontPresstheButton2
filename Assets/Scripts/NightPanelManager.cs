@@ -22,12 +22,14 @@ public class NightPanelManager : MonoBehaviour
     public Button repairButton;
     public Button skipRepairButton;
     public Button endDiaryButton;
+    public Button repairPlusButton;
+    public Button repairMinusButton;
 
     [Header("文本")]
     public TextMeshProUGUI repairInfoText;
     public TextMeshProUGUI diaryText;
 
-    int daysPerArea = 2;
+    int partsToRepair;
 
     void Start()
     {
@@ -40,6 +42,8 @@ public class NightPanelManager : MonoBehaviour
         repairButton.onClick.AddListener(OnRepair);
         skipRepairButton.onClick.AddListener(OnSkipRepair);
         endDiaryButton.onClick.AddListener(OnEndDiary);
+        repairPlusButton.onClick.AddListener(OnRepairPlus);
+        repairMinusButton.onClick.AddListener(OnRepairMinus);
 
         ShowGoForward();
     }
@@ -70,16 +74,50 @@ public class NightPanelManager : MonoBehaviour
 
     void OpenRepairPanel()
     {
-        repairInfoText.text = $"零件：{gameData.parts}  汽车完整度：{gameData.currentCarHP}/{gameData.maxCarHP}\n每消耗1个零件，回复8点完整度。";
+        // 默认选择修复至满血所需零件数
+        int hpNeeded = gameData.maxCarHP - gameData.currentCarHP;
+        int partsNeeded = Mathf.CeilToInt(hpNeeded / 8f);
+        partsToRepair = Mathf.Clamp(partsNeeded, 0, gameData.parts);
+        UpdateRepairText();
         nightPanel.SetActive(true);
         repairPanel.SetActive(true);
         diaryPanel.SetActive(false);
     }
 
+    void OnRepairPlus()
+    {
+        int maxParts = Mathf.Min(gameData.parts, Mathf.CeilToInt((gameData.maxCarHP - gameData.currentCarHP) / 8f));
+        if (partsToRepair < maxParts)
+        {
+            partsToRepair++;
+            UpdateRepairText();
+        }
+    }
+
+    void OnRepairMinus()
+    {
+        if (partsToRepair > 0)
+        {
+            partsToRepair--;
+            UpdateRepairText();
+        }
+    }
+
+    void UpdateRepairText()
+    {
+        int hpRecover = partsToRepair * 8;
+        int newHP = Mathf.Min(gameData.currentCarHP + hpRecover, gameData.maxCarHP);
+        repairInfoText.text = $"零件：{gameData.parts}  汽车完整度：{gameData.currentCarHP}/{gameData.maxCarHP}\n消耗 {partsToRepair} 个零件，回复 {hpRecover} 点 → {newHP}/{gameData.maxCarHP}";
+    }
+
     void OnRepair()
     {
-        gameData.RepairCar(3);
-        Debug.Log("修车：零件-3，汽车+24");
+        if (partsToRepair > 0)
+        {
+            int hpBefore = gameData.currentCarHP;
+            gameData.RepairCar(partsToRepair);
+            Debug.Log($"修车：零件-{partsToRepair}，汽车+{gameData.currentCarHP - hpBefore}");
+        }
         OpenDiaryPanel();
     }
 
@@ -103,7 +141,13 @@ public class NightPanelManager : MonoBehaviour
         gameData.todayLog = "";
         diaryPanel.SetActive(false);
 
-        if (gameData.currentDay % daysPerArea == 0)
+        // NightRecover 后 currentDay 已+1，奇数=刚完成区域内第2天
+        if (gameData.currentDay > 10)
+        {
+            areaManager.endingManager.TriggerEnding();
+            return;
+        }
+        if (gameData.currentDay % 2 == 1)
         {
             areaManager.TryAdvanceArea();
         }

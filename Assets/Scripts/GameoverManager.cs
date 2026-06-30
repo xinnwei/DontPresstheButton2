@@ -12,6 +12,8 @@ public class GameOverManager : MonoBehaviour
     public TextMeshProUGUI gameOverText;
     public Button restartButton;
 
+    private bool triggered;
+
     void Start()
     {
         gameOverPanel.SetActive(false);
@@ -19,14 +21,19 @@ public class GameOverManager : MonoBehaviour
     }
     void Update()
     {
-        CheckGameOver();
+        if (!triggered)
+            CheckGameOver();
     }
 
     void CheckGameOver()
     {
-        if (gameData.currentCarHP <= 0)
+        if (gameData.selfIntegrity <= 0)
         {
-            TriggerGameOver("迷失于静默——汽车完整度归零，旅途就此终结。");
+            TriggerGameOver("你不再记得自己是谁，也不记得要去哪里。八音盒停下了，世界归于寂静。");
+        }
+        else if (gameData.currentCarHP <= 0)
+        {
+            TriggerGameOver("汽车彻底报废在了荒原上。你站在路边，看着地平线上那遥不可及的灯火。");
         }
     }
 
@@ -40,6 +47,7 @@ public class GameOverManager : MonoBehaviour
     public void RestartGame()
     {
         Time.timeScale = 1f;
+        triggered = false;
         gameData.ResetData();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }

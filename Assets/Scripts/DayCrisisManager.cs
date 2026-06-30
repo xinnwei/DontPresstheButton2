@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -15,14 +13,15 @@ public class DayCrisisManager : MonoBehaviour
     public Button struggle2Button;
     public Button musicBoxButton;
 
+    [Header("按钮文本")]
+    public TextMeshProUGUI struggle1Label;
+    public TextMeshProUGUI struggle2Label;
+
     [Header("文本")]
     public TextMeshProUGUI crisisText;
 
-    string[] crisisDescriptions = {
-        "前方道路被巨石封堵，绕路会消耗大量时间和零件。",
-        "遇到一群饥肠辘辘的流浪者，他们盯上了你的车。",
-        "引擎突然过热，继续行驶可能造成严重损坏。"
-    };
+    private CrisisData currentCrisis;
+    private int currentDayIndex;
 
     void Start()
     {
@@ -32,53 +31,50 @@ public class DayCrisisManager : MonoBehaviour
         musicBoxButton.onClick.AddListener(OnMusicBox);
     }
 
-    public void TriggerCrisis()
+    public void TriggerCrisis(int dayIndex)
     {
-        int index = Random.Range(0, crisisDescriptions.Length);
-        crisisText.text = crisisDescriptions[index];
+        currentDayIndex = dayIndex;
+        currentCrisis = GameDatabase.GetCrisis(dayIndex);
+
+        crisisText.text = currentCrisis.description;
+        struggle1Label.text = currentCrisis.optionA.label;
+        struggle2Label.text = currentCrisis.optionB.label;
+
+        // 检查按钮是否可选（资源不足则灰色）
+        struggle1Button.interactable = gameData.will >= currentCrisis.optionA.willCost &&
+                                        gameData.parts >= currentCrisis.optionA.partsCost;
+        struggle2Button.interactable = gameData.will >= currentCrisis.optionB.willCost &&
+                                        gameData.parts >= currentCrisis.optionB.partsCost;
+
         dayCrisisPanel.SetActive(true);
     }
 
     void OnStruggle1()
     {
-        if (gameData.will >= 3 && gameData.parts >= 2)
-        {
-            gameData.will -= 3;
-            gameData.parts -= 2;
-            gameData.currentCarHP -= 10;
-            gameData.todayLog = "选择了挣扎求生，消耗了意志和零件，车受了点损伤。";
-            Debug.Log("挣扎求生1：意志-3，零件-2，汽车-10");
-        }
-        else
-        {
-            Debug.Log("资源不足");
-            return;
-        }
-        CloseCrisis();
+        ApplyOption(currentCrisis.optionA);
     }
 
     void OnStruggle2()
     {
-        if (gameData.will >= 5)
-        {
-            gameData.will -= 5;
-            gameData.currentCarHP -= 5;
-            gameData.todayLog = "咬牙撑过去了，意志消耗殆尽，车也磕磕碰碰。";
-            Debug.Log("挣扎求生2：意志-5，汽车-5");
-        }
-        else
-        {
-            Debug.Log("意志不足");
-            return;
-        }
+        ApplyOption(currentCrisis.optionB);
+    }
+
+    void ApplyOption(CrisisOption opt)
+    {
+        gameData.will -= opt.willCost;
+        gameData.parts -= opt.partsCost;
+        gameData.currentCarHP -= opt.carHPCost;
+        gameData.currentCarHP = Mathf.Clamp(gameData.currentCarHP, 0, gameData.maxCarHP);
+        gameData.todayLog = opt.log;
+        Debug.Log($"[{currentCrisis.label}] {opt.label}: 意志-{opt.willCost}, 零件-{opt.partsCost}, 汽车-{opt.carHPCost}");
         CloseCrisis();
     }
 
     void OnMusicBox()
     {
-        gameData.TurnMusicBox(10);
+        gameData.TurnMusicBox(currentCrisis.reversalSelfCost);
         gameData.todayLog = "逆转了八音盒，危机消散了，但有什么东西再也回不来了。";
-        Debug.Log($"逆转八音盒：自我完整度：{gameData.selfIntegrity}");
+        Debug.Log($"[{currentCrisis.label}] 逆转八音盒: 自我-{currentCrisis.reversalSelfCost}, 当前自我完整度={gameData.selfIntegrity}");
         CloseCrisis();
     }
 
