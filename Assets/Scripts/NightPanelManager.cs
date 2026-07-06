@@ -15,10 +15,16 @@ public class NightPanelManager : MonoBehaviour
     public GameObject nightPanel;
     public GameObject repairPanel;
     public GameObject diaryPanel;
+    public GameObject collectionPanel;
+    public GameObject dayCrisisPanel;
+
+    [Header("背景")]
+    public Sprite nightBackgroundSprite;
+    public GameObject gameBackground;
 
     [Header("按钮")]
     public Button endDayButton;
-    public Button triggerCrisisButton;
+    [HideInInspector] public Button triggerCrisisButton; // AreaManager 需要访问
     public Button repairButton;
     public Button skipRepairButton;
     public Button endDiaryButton;
@@ -37,6 +43,12 @@ public class NightPanelManager : MonoBehaviour
         repairPanel.SetActive(false);
         diaryPanel.SetActive(false);
 
+        if (nightBackgroundSprite != null)
+        {
+            var img = nightPanel.GetComponent<Image>();
+            if (img != null) img.sprite = nightBackgroundSprite;
+        }
+
         endDayButton.onClick.AddListener(OpenRepairPanel);
         triggerCrisisButton.onClick.AddListener(OnGoForward);
         repairButton.onClick.AddListener(OnRepair);
@@ -51,25 +63,35 @@ public class NightPanelManager : MonoBehaviour
     void OnGoForward()
     {
         triggerCrisisButton.gameObject.SetActive(false);
+        if (gameBackground != null) gameBackground.SetActive(false);
+        if (MusicManager.Instance != null) MusicManager.Instance.PlayDay();
         travelManager.StartTravel();
     }
 
     public void OnReturnFromCrisis()
     {
+        if (collectionPanel != null) collectionPanel.SetActive(false);
+        if (dayCrisisPanel != null) dayCrisisPanel.SetActive(false);
+
+        if (gameData.currentDay >= gameData.maxDays)
+        {
+            areaManager.endingManager.TriggerEnding();
+            return;
+        }
+        if (MusicManager.Instance != null) MusicManager.Instance.PlayNight();
         nightPanel.SetActive(true);
-        ShowEndDay();
+        OpenDiaryPanel();
+    }
+
+    public void ShowNewDay()
+    {
+        ShowGoForward();
     }
 
     void ShowGoForward()
     {
         triggerCrisisButton.gameObject.SetActive(true);
         endDayButton.gameObject.SetActive(false);
-    }
-
-    void ShowEndDay()
-    {
-        triggerCrisisButton.gameObject.SetActive(false);
-        endDayButton.gameObject.SetActive(true);
     }
 
     void OpenRepairPanel()
@@ -118,12 +140,27 @@ public class NightPanelManager : MonoBehaviour
             gameData.RepairCar(partsToRepair);
             Debug.Log($"修车：零件-{partsToRepair}，汽车+{gameData.currentCarHP - hpBefore}");
         }
-        OpenDiaryPanel();
+        EndNight();
     }
 
     void OnSkipRepair()
     {
-        OpenDiaryPanel();
+        EndNight();
+    }
+
+    void EndNight()
+    {
+        gameData.NightRecover();
+        gameData.todayLog = "";
+        repairPanel.SetActive(false);
+        nightPanel.SetActive(false);
+
+        if (gameData.currentDay > gameData.maxDays)
+        {
+            areaManager.endingManager.TriggerEnding();
+            return;
+        }
+        areaManager.TryAdvanceArea();
     }
 
     void OpenDiaryPanel()
@@ -137,21 +174,7 @@ public class NightPanelManager : MonoBehaviour
 
     void OnEndDiary()
     {
-        gameData.NightRecover();
-        gameData.todayLog = "";
         diaryPanel.SetActive(false);
-
-        // NightRecover 后 currentDay 已+1，奇数=刚完成区域内第2天
-        if (gameData.currentDay > 10)
-        {
-            areaManager.endingManager.TriggerEnding();
-            return;
-        }
-        if (gameData.currentDay == 4 || gameData.currentDay == 7 || gameData.currentDay == 10)
-        {
-            areaManager.TryAdvanceArea();
-        }
-
-        ShowGoForward();
+        OpenRepairPanel();
     }
 }

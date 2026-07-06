@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -11,11 +9,11 @@ public class AreaManager : MonoBehaviour
     public TextMeshProUGUI areaNameText;
     public Button continueButton;
     public EndingManager endingManager;
+    public Sprite[] areaBackgrounds;
 
-    // 💡 新增：引入危机管理器，用来在切章节时把它关掉，防止字撞车
     public DayCrisisManager dayCrisisManager;
-    // 💡 新增：引入夜晚面板管理器，用来在点击 Continue 后重启新一天的 go forward 按钮
     public NightPanelManager nightPanelManager;
+    private Image bgImage;
 
     string[] areaNames = {
         "第一章：告别故土",
@@ -28,7 +26,11 @@ public class AreaManager : MonoBehaviour
     void Start()
     {
         areaTransitionPanel.SetActive(false);
-        continueButton.onClick.AddListener(OnContinue);
+        if (continueButton == null)
+            continueButton = areaTransitionPanel.GetComponentInChildren<Button>();
+        if (continueButton != null)
+            continueButton.onClick.AddListener(OnContinue);
+        bgImage = areaTransitionPanel.GetComponent<Image>();
     }
 
     public void TryAdvanceArea()
@@ -39,27 +41,26 @@ public class AreaManager : MonoBehaviour
             return;
         }
 
-        // 🛠️ 修复1：当进入过渡面板时，强行把危机面板关掉，防止两个面板的字和按钮叠在一起撞车
         if (dayCrisisManager != null)
-        {
             dayCrisisManager.dayCrisisPanel.SetActive(false);
-        }
 
         gameData.currentArea++;
-        areaNameText.text = areaNames[gameData.currentArea - 1];
+        int areaIdx = gameData.currentArea - 1;
+        areaNameText.text = areaNames[areaIdx];
+
+        if (bgImage != null && areaBackgrounds.Length > areaIdx)
+            bgImage.sprite = areaBackgrounds[areaIdx];
+
         areaTransitionPanel.SetActive(true);
     }
 
     void OnContinue()
     {
         areaTransitionPanel.SetActive(false);
-
-        // 🛠️ 修复2：点击 Continue 结束章节过渡后，必须主动让流程走下去！
-        // 重新调用 nightPanelManager 的初始化，把新一天的 "go forward" 按钮老老实实召唤出来！
         if (nightPanelManager != null)
         {
-            // 重新刷新天数UI并亮起 go forward 按钮
-            nightPanelManager.OnReturnFromCrisis();
+            nightPanelManager.triggerCrisisButton.gameObject.SetActive(false);
+            nightPanelManager.travelManager.StartTravel();
         }
     }
 

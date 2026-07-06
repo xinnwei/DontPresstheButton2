@@ -9,15 +9,21 @@ public class CollectionEventManager : MonoBehaviour
 
     [Header("面板")]
     public GameObject collectionPanel;
+    public GameObject travelPanel;
     public TextMeshProUGUI eventText;
     public Button confirmButton;
 
+    [Header("背景")]
+    public Sprite[] areaBackgrounds;
+
     private int pendingDayIndex;
+    private Image bgImage;
 
     void Start()
     {
         collectionPanel.SetActive(false);
         confirmButton.onClick.AddListener(OnConfirm);
+        bgImage = collectionPanel.GetComponent<Image>();
     }
 
     public void TriggerCollection(int dayIndex)
@@ -25,6 +31,12 @@ public class CollectionEventManager : MonoBehaviour
         pendingDayIndex = dayIndex;
         var e = GameDatabase.GetCollectionEvent(dayIndex);
         eventText.text = e.description;
+        if (travelPanel != null) travelPanel.SetActive(false);
+
+        int areaIdx = Mathf.Clamp(dayIndex, 0, areaBackgrounds.Length - 1);
+        if (bgImage != null && areaBackgrounds.Length > areaIdx)
+            bgImage.sprite = areaBackgrounds[areaIdx];
+
         collectionPanel.SetActive(true);
     }
 

@@ -23,6 +23,7 @@ public class GameData : ScriptableObject
     public int currentArea = 1;       // 当前区域1-5
     public string todayLog = "";
     public int musicBoxTurnCount = 0; // 八音盒逆转次数
+    public int maxDays = 5;
 
     public void TurnMusicBox(int selfCost)
     {

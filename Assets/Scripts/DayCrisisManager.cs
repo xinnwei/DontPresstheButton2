@@ -6,6 +6,7 @@ public class DayCrisisManager : MonoBehaviour
 {
     public GameData gameData;
     public GameObject dayCrisisPanel;
+    public GameObject collectionPanel;
     public NightPanelManager nightPanelManager;
 
     [Header("按钮")]
@@ -20,8 +21,12 @@ public class DayCrisisManager : MonoBehaviour
     [Header("文本")]
     public TextMeshProUGUI crisisText;
 
+    [Header("背景")]
+    public Sprite[] areaBackgrounds;
+
     private CrisisData currentCrisis;
     private int currentDayIndex;
+    private Image bgImage;
 
     void Start()
     {
@@ -29,6 +34,7 @@ public class DayCrisisManager : MonoBehaviour
         struggle1Button.onClick.AddListener(OnStruggle1);
         struggle2Button.onClick.AddListener(OnStruggle2);
         musicBoxButton.onClick.AddListener(OnMusicBox);
+        bgImage = dayCrisisPanel.GetComponent<Image>();
     }
 
     public void TriggerCrisis(int dayIndex)
@@ -45,6 +51,12 @@ public class DayCrisisManager : MonoBehaviour
                                         gameData.parts >= currentCrisis.optionA.partsCost;
         struggle2Button.interactable = gameData.will >= currentCrisis.optionB.willCost &&
                                         gameData.parts >= currentCrisis.optionB.partsCost;
+
+        if (collectionPanel != null) collectionPanel.SetActive(false);
+
+        int areaIdx = Mathf.Clamp(dayIndex, 0, areaBackgrounds.Length - 1);
+        if (bgImage != null && areaBackgrounds.Length > areaIdx)
+            bgImage.sprite = areaBackgrounds[areaIdx];
 
         dayCrisisPanel.SetActive(true);
     }
@@ -73,7 +85,7 @@ public class DayCrisisManager : MonoBehaviour
     void OnMusicBox()
     {
         gameData.TurnMusicBox(currentCrisis.reversalSelfCost);
-        gameData.todayLog = "逆转了八音盒，危机消散了，但有什么东西再也回不来了。";
+        gameData.todayLog = GameDatabase.GetReversalLog(currentDayIndex);
         Debug.Log($"[{currentCrisis.label}] 逆转八音盒: 自我-{currentCrisis.reversalSelfCost}, 当前自我完整度={gameData.selfIntegrity}");
         CloseCrisis();
     }
