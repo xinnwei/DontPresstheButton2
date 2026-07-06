@@ -147,7 +147,7 @@ public class NightPanelManager : MonoBehaviour
             areaManager.endingManager.TriggerEnding();
             return;
         }
-        if (gameData.currentDay % 2 == 1)
+        if (gameData.currentDay == 4 || gameData.currentDay == 7 || gameData.currentDay == 10)
         {
             areaManager.TryAdvanceArea();
         }
