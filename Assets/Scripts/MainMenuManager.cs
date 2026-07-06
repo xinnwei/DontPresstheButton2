@@ -13,7 +13,7 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
-        titleText.text = "Don't touch the button";
+        
         startButton.onClick.AddListener(StartGame);
     }
 
